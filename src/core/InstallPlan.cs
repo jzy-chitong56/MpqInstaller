@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using MpqInstaller.Config;
-using MpqInstaller.i18n;
 
 namespace MpqInstaller.Core;
 

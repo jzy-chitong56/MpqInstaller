@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using MpqInstaller.Config;
 
 namespace MpqInstaller.Core;
 

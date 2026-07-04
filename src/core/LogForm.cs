@@ -1,8 +1,7 @@
 using System;
 using System.Windows.Forms;
-using MpqInstaller.i18n;
 
-namespace MpqInstaller.UI;
+namespace MpqInstaller.Core;
 
 public sealed partial class LogForm : Form
 {
@@ -51,7 +50,6 @@ public sealed partial class LogForm : Form
         }
         if (string.IsNullOrEmpty(line)) return;
         _txtLog.AppendText(line + "\r\n");
-        // 限制最大行数，避免内存膨胀
         if (_txtLog.Lines.Length > 2000)
         {
             var start = _txtLog.GetFirstCharIndexFromLine(500);

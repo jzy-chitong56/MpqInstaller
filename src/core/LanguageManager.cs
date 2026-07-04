@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 
-namespace MpqInstaller.i18n;
+namespace MpqInstaller.Core;
 
 public static class LanguageManager
 {

@@ -21,8 +21,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="i18n\zh-CN.json" />
-    <EmbeddedResource Include="i18n\en-US.json" />
+    <EmbeddedResource Include="..\i18n\zh-CN.json" Link="i18n\zh-CN.json" />
+    <EmbeddedResource Include="..\i18n\en-US.json" Link="i18n\en-US.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\config.json" CopyToOutputDirectory="PreserveNewest" Link="config.json" />
   </ItemGroup>
 
 </Project>

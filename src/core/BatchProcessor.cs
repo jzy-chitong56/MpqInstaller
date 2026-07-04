@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MpqInstaller.Config;
-using MpqInstaller.i18n;
 
 namespace MpqInstaller.Core;
 

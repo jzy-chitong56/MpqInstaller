@@ -5,11 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MpqInstaller.Config;
-using MpqInstaller.Core;
-using MpqInstaller.i18n;
 
-namespace MpqInstaller.UI;
+namespace MpqInstaller.Core;
 
 public partial class MainForm : Form
 {
@@ -19,11 +16,9 @@ public partial class MainForm : Form
     private InstallConfig? _config;
     private string _configError = string.Empty;
 
-    // 缓存 Profile 列表（按配置顺序，前两个作为左右单选）
     private List<ProfileItem> _profileItems = new();
     private List<ModeItem> _modeItems = new();
 
-    // 日志
     private LogForm? _logForm;
 
     public MainForm()
@@ -38,10 +33,6 @@ public partial class MainForm : Form
         UpdateUiEnabledState();
         ResetBottomProgress();
     }
-
-    // -----------------------------------------------------------------------
-    //  初始化与本地化
-    // -----------------------------------------------------------------------
 
     private void InitLanguageCombo()
     {
@@ -142,10 +133,6 @@ public partial class MainForm : Form
         btnCancel.Visible = _running;
     }
 
-    // -----------------------------------------------------------------------
-    //  配置加载 + Profile/Mode 填充
-    // -----------------------------------------------------------------------
-
     private void LoadConfig()
     {
         _profileItems.Clear();
@@ -163,7 +150,6 @@ public partial class MainForm : Form
             return;
         }
 
-        // 收集所有 Profile，按配置顺序
         foreach (var kv in cfg!.Profiles)
         {
             _profileItems.Add(new ProfileItem(
@@ -171,14 +157,12 @@ public partial class MainForm : Form
                 ConfigLoader.GetDisplayName(kv.Value.DisplayName, kv.Key)));
         }
 
-        // 至少需要 2 个 Profile 才能有左右单选
         if (_profileItems.Count < 2)
         {
             _config = null;
             return;
         }
 
-        // 默认第一个 Profile 选中
         if (!_initializing)
             RefreshProfileAndModeDisplay();
     }
@@ -193,7 +177,6 @@ public partial class MainForm : Form
             return;
         }
 
-        // 更新显示名（语言切换后可能变化）
         for (var i = 0; i < _profileItems.Count; i++)
         {
             var kv = _config.Profiles[_profileItems[i].Key];
@@ -204,7 +187,6 @@ public partial class MainForm : Form
         rbProfileA.Text = _profileItems[0].DisplayName;
         rbProfileB.Text = _profileItems[1].DisplayName;
 
-        // 保持当前选中状态（默认 A）
         if (!rbProfileA.Checked && !rbProfileB.Checked)
             rbProfileA.Checked = true;
 
@@ -230,14 +212,9 @@ public partial class MainForm : Form
             clbModes.Items.Add(display);
         }
 
-        // 默认全部勾选
         for (var i = 0; i < clbModes.Items.Count; i++)
             clbModes.SetItemChecked(i, true);
     }
-
-    // -----------------------------------------------------------------------
-    //  执行
-    // -----------------------------------------------------------------------
 
     private void RunInstall(bool batchMode)
     {
@@ -245,7 +222,6 @@ public partial class MainForm : Form
 
         var isInstall = rbInstall.Checked;
 
-        // 选地图
         List<string>? maps;
         if (batchMode)
         {
@@ -274,7 +250,6 @@ public partial class MainForm : Form
             maps = new List<string> { ofd.FileName };
         }
 
-        // MPQEditor 校验
         var (exePath, baseDir) = MpqEditor.ResolvePaths(_config);
         if (!File.Exists(exePath))
         {
@@ -282,7 +257,6 @@ public partial class MainForm : Form
             return;
         }
 
-        // 安装模式：取当前 Profile + 选中的 Mode 列表（叠加合并）
         ProfileConfig? profile = null;
         List<ModeConfig>? selectedModes = null;
         string profileKey;
@@ -315,7 +289,6 @@ public partial class MainForm : Form
         }
         else
         {
-            // 卸载模式
             if (_config.UninstallFiles == null || _config.UninstallFiles.Length == 0)
             {
                 Warn(L("err_config_empty") + " UninstallFiles");
@@ -323,7 +296,6 @@ public partial class MainForm : Form
             }
         }
 
-        // 预警
         var warningText = ConfigLoader.GetWarningText(_config);
         if (string.IsNullOrEmpty(warningText))
             warningText = isInstall ? L("warn_default_install") : L("warn_default_uninstall");
@@ -331,7 +303,6 @@ public partial class MainForm : Form
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
             return;
 
-        // 开始执行
         SetRunning(true);
         InitBottomProgress(maps.Count);
         OpenLogWindow();
@@ -346,13 +317,10 @@ public partial class MainForm : Form
 
             if (isInstall)
             {
-                // 按勾选的 Mode 顺序依次执行安装（每个 Mode 对应一次完整写入流程：htsize + base + mode + flush）
                 foreach (var mode in selectedModes!)
                 {
                     var result = await BatchProcessor.RunInstallAsync(
                         maps, _config!, profile!, mode, mpq,
-                        // 每个 Mode 重新从 0 计数不太对，我们要总进度
-                        // 这里的 progress 直接转发
                         progress, _cts.Token);
 
                     if (result.Aborted)
@@ -419,10 +387,6 @@ public partial class MainForm : Form
         MessageBox.Show(this, msg, L("app_title"), MessageBoxButtons.OK, icon);
     }
 
-    // -----------------------------------------------------------------------
-    //  进度回调（UI 线程）
-    // -----------------------------------------------------------------------
-
     private void ReportProgress(ProgressReport r)
     {
         switch (r.Kind)
@@ -473,10 +437,6 @@ public partial class MainForm : Form
         lblBottomProgress.Text = $"0/{total}";
     }
 
-    // -----------------------------------------------------------------------
-    //  日志窗口
-    // -----------------------------------------------------------------------
-
     private void OpenLogWindow()
     {
         if (_logForm == null || _logForm.IsDisposed)
@@ -498,10 +458,6 @@ public partial class MainForm : Form
         if (string.IsNullOrEmpty(line)) return;
         _logForm?.AppendLog(line);
     }
-
-    // -----------------------------------------------------------------------
-    //  辅助
-    // -----------------------------------------------------------------------
 
     private List<string> CollectMapsInFolder(string folder)
     {

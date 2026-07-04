@@ -1,53 +1,41 @@
 #nullable enable
-namespace MpqInstaller.UI;
+namespace MpqInstaller.Core;
 
 partial class MainForm
 {
     private System.ComponentModel.IContainer? components = null;
 
-    // 顶部蓝色标题栏
     private System.Windows.Forms.Panel pnlTitle = null!;
     private System.Windows.Forms.Label lblTitle = null!;
     private System.Windows.Forms.Label lblTitleVersion = null!;
-    private System.Windows.Forms.Label lblLanguage = null!;
     private System.Windows.Forms.ComboBox cboLanguage = null!;
 
-    // 配置状态小字
     private System.Windows.Forms.Label lblConfigStatus = null!;
     private System.Windows.Forms.Button btnReloadConfig = null!;
 
-    // 操作行
     private System.Windows.Forms.Label lblOperation = null!;
     private System.Windows.Forms.RadioButton rbInstall = null!;
     private System.Windows.Forms.RadioButton rbUninstall = null!;
 
-    // 分隔线
     private System.Windows.Forms.Panel pnlSep1 = null!;
 
-    // Profile 行（两列单选）
     private System.Windows.Forms.Label lblProfile = null!;
     private System.Windows.Forms.RadioButton rbProfileA = null!;
     private System.Windows.Forms.RadioButton rbProfileB = null!;
 
-    // 分隔线
     private System.Windows.Forms.Panel pnlSep2 = null!;
 
-    // Mode 行（复选项列表）
     private System.Windows.Forms.Label lblMode = null!;
     private System.Windows.Forms.CheckedListBox clbModes = null!;
 
-    // 分隔线
     private System.Windows.Forms.Panel pnlSep3 = null!;
 
-    // 底部两个大按钮
     private System.Windows.Forms.Button btnSingleMap = null!;
     private System.Windows.Forms.Button btnFolder = null!;
 
-    // 取消按钮
     private System.Windows.Forms.Button btnCancel = null!;
     private System.Windows.Forms.Button btnShowLog = null!;
 
-    // 底部进度条 + 数量
     private System.Windows.Forms.ProgressBar bottomProgress = null!;
     private System.Windows.Forms.Label lblBottomProgress = null!;
 
@@ -63,7 +51,6 @@ partial class MainForm
         pnlTitle = new System.Windows.Forms.Panel();
         lblTitle = new System.Windows.Forms.Label();
         lblTitleVersion = new System.Windows.Forms.Label();
-        lblLanguage = new System.Windows.Forms.Label();
         cboLanguage = new System.Windows.Forms.ComboBox();
         lblConfigStatus = new System.Windows.Forms.Label();
         btnReloadConfig = new System.Windows.Forms.Button();

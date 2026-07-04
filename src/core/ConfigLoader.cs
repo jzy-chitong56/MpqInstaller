@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using MpqInstaller.i18n;
 
-namespace MpqInstaller.Config;
+namespace MpqInstaller.Core;
 
 public static class ConfigLoader
 {

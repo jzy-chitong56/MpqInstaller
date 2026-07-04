@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MpqInstaller.Config;
+namespace MpqInstaller.Core;
 
 public sealed class InstallConfig
 {
