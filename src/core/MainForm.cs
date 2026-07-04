@@ -254,17 +254,15 @@ public static class BatchProcessor
 public sealed partial class MainForm : Form
 {
     private System.ComponentModel.IContainer? components = null;
-    private Panel pnlTitle = null!; private Label lblTitle = null!; private Label lblTitleVersion = null!; private ComboBox cboLanguage = null!;
-    private Label lblConfigStatus = null!; private Button btnReloadConfig = null!;
+    private Panel pnlTitle = null!; private ComboBox cboLanguage = null!;
     private Label lblOperation = null!; private RadioButton rbInstall = null!; private RadioButton rbUninstall = null!;
     private Panel pnlSep1 = null!;
     private Label lblProfile = null!; private RadioButton rbProfileA = null!; private RadioButton rbProfileB = null!;
     private Panel pnlSep2 = null!;
-    private Label lblMode = null!; private CheckedListBox clbModes = null!;
+    private Label lblMode = null!; private RadioButton[] rbModes = null!;
     private Panel pnlSep3 = null!;
     private Button btnSingleMap = null!; private Button btnFolder = null!;
     private Button btnCancel = null!; private Button btnShowLog = null!;
-    private ProgressBar bottomProgress = null!; private Label lblBottomProgress = null!;
 
     private bool _initializing = true; private bool _running; private CancellationTokenSource? _cts;
     private InstallConfig? _config; private string _configError = string.Empty;
@@ -274,62 +272,50 @@ public sealed partial class MainForm : Form
     public MainForm()
     {
         InitializeComponent(); InitLanguageCombo(); LoadConfig(); ApplyLanguage();
-        _initializing = false; WireEvents(); UpdateUiEnabledState(); ResetBottomProgress();
+        _initializing = false; WireEvents(); UpdateUiEnabledState();
     }
 
     protected override void Dispose(bool disposing) { if (disposing && components != null) components.Dispose(); base.Dispose(disposing); }
 
     private void InitializeComponent()
     {
-        pnlTitle = new(); lblTitle = new(); lblTitleVersion = new(); cboLanguage = new();
-        lblConfigStatus = new(); btnReloadConfig = new();
+        pnlTitle = new(); cboLanguage = new();
         lblOperation = new(); rbInstall = new(); rbUninstall = new();
         pnlSep1 = new(); lblProfile = new(); rbProfileA = new(); rbProfileB = new();
-        pnlSep2 = new(); lblMode = new(); clbModes = new(); pnlSep3 = new();
+        pnlSep2 = new(); lblMode = new(); pnlSep3 = new();
         btnSingleMap = new(); btnFolder = new(); btnCancel = new(); btnShowLog = new();
-        bottomProgress = new(); lblBottomProgress = new();
         SuspendLayout();
 
-        pnlTitle.BackColor = System.Drawing.Color.FromArgb(0, 120, 215); pnlTitle.Dock = DockStyle.Top; pnlTitle.Size = new(420, 60);
-        lblTitle.Font = new("微软雅黑", 14F, System.Drawing.FontStyle.Bold); lblTitle.ForeColor = System.Drawing.Color.White; lblTitle.Location = new(16, 10); lblTitle.AutoSize = true;
-        lblTitleVersion.Font = new("微软雅黑", 9F); lblTitleVersion.ForeColor = System.Drawing.Color.FromArgb(220, 230, 245); lblTitleVersion.Location = new(16, 36); lblTitleVersion.AutoSize = true;
-        cboLanguage.DropDownStyle = ComboBoxStyle.DropDownList; cboLanguage.FlatStyle = FlatStyle.Flat; cboLanguage.Font = new("微软雅黑", 9F); cboLanguage.Location = new(316, 12); cboLanguage.Size = new(90, 25);
-        pnlTitle.Controls.Add(lblTitle); pnlTitle.Controls.Add(lblTitleVersion); pnlTitle.Controls.Add(cboLanguage);
+        pnlTitle.BackColor = System.Drawing.Color.FromArgb(0, 120, 215); pnlTitle.Dock = DockStyle.Top; pnlTitle.Size = new(420, 40);
+        cboLanguage.DropDownStyle = ComboBoxStyle.DropDownList; cboLanguage.FlatStyle = FlatStyle.Flat; cboLanguage.Font = new("微软雅黑", 9F); cboLanguage.Location = new(316, 8); cboLanguage.Size = new(90, 25);
+        pnlTitle.Controls.Add(cboLanguage);
 
-        lblConfigStatus.AutoSize = true; lblConfigStatus.ForeColor = System.Drawing.Color.Gray; lblConfigStatus.Font = new("微软雅黑", 8F); lblConfigStatus.Location = new(12, 68);
-        btnReloadConfig.FlatStyle = FlatStyle.Flat; btnReloadConfig.Font = new("微软雅黑", 8F); btnReloadConfig.ForeColor = System.Drawing.Color.FromArgb(0, 120, 215); btnReloadConfig.Location = new(316, 64); btnReloadConfig.Size = new(92, 22);
+        lblOperation.Font = new("微软雅黑", 10F, System.Drawing.FontStyle.Bold); lblOperation.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50); lblOperation.Location = new(12, 50); lblOperation.Size = new(120, 20);
+        rbInstall.Font = new("微软雅黑", 9F); rbInstall.Location = new(24, 77); rbInstall.AutoSize = true; rbInstall.Checked = true;
+        rbUninstall.Font = new("微软雅黑", 9F); rbUninstall.Location = new(230, 77); rbUninstall.AutoSize = true;
+        pnlSep1.BackColor = System.Drawing.Color.FromArgb(225, 225, 225); pnlSep1.Location = new(12, 110); pnlSep1.Size = new(396, 1);
 
-        lblOperation.Font = new("微软雅黑", 10F, System.Drawing.FontStyle.Bold); lblOperation.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50); lblOperation.Location = new(12, 98); lblOperation.Size = new(120, 20);
-        rbInstall.Font = new("微软雅黑", 9F); rbInstall.Location = new(24, 125); rbInstall.AutoSize = true; rbInstall.Checked = true;
-        rbUninstall.Font = new("微软雅黑", 9F); rbUninstall.Location = new(230, 125); rbUninstall.AutoSize = true;
-        pnlSep1.BackColor = System.Drawing.Color.FromArgb(225, 225, 225); pnlSep1.Location = new(12, 158); pnlSep1.Size = new(396, 1);
+        lblProfile.Font = new("微软雅黑", 10F, System.Drawing.FontStyle.Bold); lblProfile.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50); lblProfile.Location = new(12, 120); lblProfile.Size = new(120, 20);
+        rbProfileA.Font = new("微软雅黑", 9F); rbProfileA.Location = new(24, 147); rbProfileA.AutoSize = true; rbProfileA.Checked = true;
+        rbProfileB.Font = new("微软雅黑", 9F); rbProfileB.Location = new(230, 147); rbProfileB.AutoSize = true;
+        pnlSep2.BackColor = System.Drawing.Color.FromArgb(225, 225, 225); pnlSep2.Location = new(12, 180); pnlSep2.Size = new(396, 1);
 
-        lblProfile.Font = new("微软雅黑", 10F, System.Drawing.FontStyle.Bold); lblProfile.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50); lblProfile.Location = new(12, 168); lblProfile.Size = new(120, 20);
-        rbProfileA.Font = new("微软雅黑", 9F); rbProfileA.Location = new(24, 195); rbProfileA.AutoSize = true; rbProfileA.Checked = true;
-        rbProfileB.Font = new("微软雅黑", 9F); rbProfileB.Location = new(230, 195); rbProfileB.AutoSize = true;
-        pnlSep2.BackColor = System.Drawing.Color.FromArgb(225, 225, 225); pnlSep2.Location = new(12, 228); pnlSep2.Size = new(396, 1);
+        lblMode.Font = new("微软雅黑", 10F, System.Drawing.FontStyle.Bold); lblMode.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50); lblMode.Location = new(12, 190); lblMode.Size = new(120, 20);
+        pnlSep3.BackColor = System.Drawing.Color.FromArgb(225, 225, 225); pnlSep3.Location = new(12, 310); pnlSep3.Size = new(396, 1);
 
-        lblMode.Font = new("微软雅黑", 10F, System.Drawing.FontStyle.Bold); lblMode.ForeColor = System.Drawing.Color.FromArgb(50, 50, 50); lblMode.Location = new(12, 238); lblMode.Size = new(120, 20);
-        clbModes.BorderStyle = BorderStyle.None; clbModes.CheckOnClick = true; clbModes.ColumnWidth = 190; clbModes.Font = new("微软雅黑", 9F); clbModes.ItemHeight = 20; clbModes.Location = new(24, 265); clbModes.MultiColumn = true; clbModes.Size = new(380, 70); clbModes.BackColor = SystemColors.Window;
-        pnlSep3.BackColor = System.Drawing.Color.FromArgb(225, 225, 225); pnlSep3.Location = new(12, 340); pnlSep3.Size = new(396, 1);
+        btnSingleMap.Font = new("微软雅黑", 11F); btnSingleMap.Location = new(12, 328); btnSingleMap.Size = new(195, 48); btnSingleMap.FlatStyle = FlatStyle.System;
+        btnFolder.Font = new("微软雅黑", 11F); btnFolder.Location = new(213, 328); btnFolder.Size = new(195, 48); btnFolder.FlatStyle = FlatStyle.System;
+        btnCancel.Font = new("微软雅黑", 9F); btnCancel.Location = new(12, 390); btnCancel.Size = new(80, 26); btnCancel.Visible = false;
+        btnShowLog.Font = new("微软雅黑", 9F); btnShowLog.ForeColor = System.Drawing.Color.FromArgb(0, 120, 215); btnShowLog.FlatStyle = FlatStyle.Flat; btnShowLog.Location = new(320, 390); btnShowLog.Size = new(88, 26);
 
-        btnSingleMap.Font = new("微软雅黑", 11F); btnSingleMap.Location = new(12, 358); btnSingleMap.Size = new(195, 48); btnSingleMap.FlatStyle = FlatStyle.System;
-        btnFolder.Font = new("微软雅黑", 11F); btnFolder.Location = new(213, 358); btnFolder.Size = new(195, 48); btnFolder.FlatStyle = FlatStyle.System;
-        btnCancel.Font = new("微软雅黑", 9F); btnCancel.Location = new(12, 420); btnCancel.Size = new(80, 26); btnCancel.Visible = false;
-        btnShowLog.Font = new("微软雅黑", 9F); btnShowLog.ForeColor = System.Drawing.Color.FromArgb(0, 120, 215); btnShowLog.FlatStyle = FlatStyle.Flat; btnShowLog.Location = new(320, 420); btnShowLog.Size = new(88, 26);
-
-        bottomProgress.Dock = DockStyle.Bottom; bottomProgress.Size = new(420, 22); bottomProgress.Maximum = 100; bottomProgress.Value = 0; bottomProgress.Style = ProgressBarStyle.Continuous;
-        lblBottomProgress.Dock = DockStyle.Bottom; lblBottomProgress.TextAlign = System.Drawing.ContentAlignment.MiddleRight; lblBottomProgress.Font = new("微软雅黑", 9F); lblBottomProgress.ForeColor = System.Drawing.Color.DimGray; lblBottomProgress.Size = new(420, 22); lblBottomProgress.Text = "0/0"; lblBottomProgress.Padding = new(0, 0, 14, 0); lblBottomProgress.BackColor = System.Drawing.Color.FromArgb(245, 245, 245);
-
-        AutoScaleMode = AutoScaleMode.Dpi; ClientSize = new(420, 510);
-        Controls.Add(pnlTitle); Controls.Add(lblConfigStatus); Controls.Add(btnReloadConfig);
+        AutoScaleMode = AutoScaleMode.Dpi; ClientSize = new(420, 450);
+        Controls.Add(pnlTitle);
         Controls.Add(lblOperation); Controls.Add(rbInstall); Controls.Add(rbUninstall); Controls.Add(pnlSep1);
         Controls.Add(lblProfile); Controls.Add(rbProfileA); Controls.Add(rbProfileB); Controls.Add(pnlSep2);
-        Controls.Add(lblMode); Controls.Add(clbModes); Controls.Add(pnlSep3);
+        Controls.Add(lblMode); Controls.Add(pnlSep3);
         Controls.Add(btnSingleMap); Controls.Add(btnFolder); Controls.Add(btnCancel); Controls.Add(btnShowLog);
-        Controls.Add(bottomProgress); Controls.Add(lblBottomProgress);
         FormBorderStyle = FormBorderStyle.FixedSingle; MaximizeBox = false; MinimizeBox = true;
-        StartPosition = FormStartPosition.CenterScreen; MinimumSize = new(420, 510); MaximumSize = new(420, 510);
+        StartPosition = FormStartPosition.CenterScreen; MinimumSize = new(420, 450); MaximumSize = new(420, 450);
         ResumeLayout(false); PerformLayout();
     }
 
@@ -338,9 +324,8 @@ public sealed partial class MainForm : Form
 
     private void ApplyLanguage()
     {
-        Text = L("app_title"); lblTitle.Text = L("app_title"); lblTitleVersion.Text = L("title_version");
-        lblConfigStatus.Text = L("lbl_config_status") + (_config != null ? L("config_loaded_ok") : L("config_load_failed"));
-        btnReloadConfig.Text = L("btn_reload_config"); lblOperation.Text = L("lbl_operation");
+        Text = L("app_title");
+        lblOperation.Text = L("lbl_operation");
         rbInstall.Text = L("op_install"); rbUninstall.Text = L("op_uninstall");
         lblProfile.Text = L("lbl_profile"); lblMode.Text = L("lbl_mode");
         btnSingleMap.Text = L("btn_single_map"); btnFolder.Text = L("btn_folder");
@@ -350,7 +335,6 @@ public sealed partial class MainForm : Form
     private void WireEvents()
     {
         cboLanguage.SelectedIndexChanged += (_, _) => { if (_initializing) return; if (cboLanguage.SelectedItem is LangItem item) { LanguageManager.SetLanguage(item.Code); ApplyLanguage(); RefreshProfileAndModeDisplay(); } };
-        btnReloadConfig.Click += (_, _) => { LoadConfig(); RefreshProfileAndModeDisplay(); UpdateUiEnabledState(); lblConfigStatus.Text = L("lbl_config_status") + (_config != null ? L("config_loaded_ok") : L("config_load_failed")); };
         rbInstall.CheckedChanged += (_, _) => { if (rbInstall.Checked) UpdateUiEnabledState(); };
         rbUninstall.CheckedChanged += (_, _) => { if (rbUninstall.Checked) UpdateUiEnabledState(); };
         rbProfileA.CheckedChanged += (_, _) => { if (_initializing || !rbProfileA.Checked) return; RefreshModesFromCurrentProfile(); };
@@ -359,7 +343,9 @@ public sealed partial class MainForm : Form
         btnCancel.Click += (_, _) => CancelRun(); btnShowLog.Click += (_, _) => ShowLogWindow();
     }
 
-    private void UpdateUiEnabledState() { var installMode = rbInstall.Checked; var configOk = _config != null && _profileItems.Count >= 2; rbProfileA.Enabled = installMode && configOk; rbProfileB.Enabled = installMode && configOk; clbModes.Enabled = installMode && configOk; btnSingleMap.Enabled = !_running && configOk; btnFolder.Enabled = !_running && configOk; btnCancel.Visible = _running; }
+    private void UpdateUiEnabledState() { var installMode = rbInstall.Checked; var configOk = _config != null && _profileItems.Count >= 2; rbProfileA.Enabled = installMode && configOk; rbProfileB.Enabled = installMode && configOk; EnableModes(installMode && configOk); btnSingleMap.Enabled = !_running && configOk; btnFolder.Enabled = !_running && configOk; btnCancel.Visible = _running; }
+
+    private void EnableModes(bool enabled) { if (rbModes != null) foreach (var rb in rbModes) rb.Enabled = enabled; }
 
     private void LoadConfig()
     {
@@ -372,7 +358,7 @@ public sealed partial class MainForm : Form
 
     private void RefreshProfileAndModeDisplay()
     {
-        if (_config == null || _profileItems.Count < 2) { rbProfileA.Text = "—"; rbProfileB.Text = "—"; clbModes.Items.Clear(); return; }
+        if (_config == null || _profileItems.Count < 2) { rbProfileA.Text = "—"; rbProfileB.Text = "—"; ClearModes(); return; }
         for (var i = 0; i < _profileItems.Count; i++) { var kv = _config.Profiles[_profileItems[i].Key]; var display = ConfigLoader.GetDisplayName(kv.DisplayName, _profileItems[i].Key); _profileItems[i] = _profileItems[i] with { DisplayName = display }; }
         rbProfileA.Text = _profileItems[0].DisplayName; rbProfileB.Text = _profileItems[1].DisplayName;
         if (!rbProfileA.Checked && !rbProfileB.Checked) rbProfileA.Checked = true;
@@ -381,12 +367,32 @@ public sealed partial class MainForm : Form
 
     private void RefreshModesFromCurrentProfile()
     {
-        clbModes.Items.Clear(); _modeItems.Clear();
+        ClearModes();
         if (_config == null || _profileItems.Count < 2) return;
         var profileKey = rbProfileA.Checked ? _profileItems[0].Key : _profileItems[1].Key;
         if (!_config.Profiles.TryGetValue(profileKey, out var profile)) return;
-        foreach (var kv in profile.Modes) { var display = ConfigLoader.GetDisplayName(kv.Value.DisplayName, kv.Key); _modeItems.Add(new(kv.Key, display)); clbModes.Items.Add(display); }
-        for (var i = 0; i < clbModes.Items.Count; i++) clbModes.SetItemChecked(i, true);
+        var modes = profile.Modes.ToList();
+        if (modes.Count == 0) return;
+        _modeItems.Clear(); foreach (var kv in modes) { var display = ConfigLoader.GetDisplayName(kv.Value.DisplayName, kv.Key); _modeItems.Add(new(kv.Key, display)); }
+        rbModes = new RadioButton[modes.Count]; var y = 217;
+        for (var i = 0; i < modes.Count; i++)
+        {
+            rbModes[i] = new() { Font = new("微软雅黑", 9F), Location = new((i % 2 == 0 ? 24 : 230), y), AutoSize = true, Text = _modeItems[i].DisplayName };
+            if (i % 2 == 1) y += 26;
+            Controls.Add(rbModes[i]);
+        }
+        if (rbModes.Length > 0) rbModes[0].Checked = true;
+    }
+
+    private void ClearModes() { if (rbModes != null) { foreach (var rb in rbModes) Controls.Remove(rb); rbModes = null!; } }
+
+    private ModeConfig? GetSelectedMode()
+    {
+        if (rbModes == null || _modeItems.Count == 0) return null;
+        var profileKey = rbProfileA.Checked ? _profileItems[0].Key : _profileItems[1].Key;
+        if (!_config!.Profiles.TryGetValue(profileKey, out var profile)) return null;
+        for (var i = 0; i < rbModes.Length; i++) { if (rbModes[i].Checked) { if (profile.Modes.TryGetValue(_modeItems[i].Key, out var m)) return m; } }
+        return null;
     }
 
     private void RunInstall(bool batchMode)
@@ -400,13 +406,13 @@ public sealed partial class MainForm : Form
         var (exePath, baseDir) = MpqEditor.ResolvePaths(_config);
         if (!File.Exists(exePath)) { Warn(LF("err_mpq_missing", exePath)); return; }
 
-        ProfileConfig? profile = null; List<ModeConfig>? selectedModes = null;
+        ProfileConfig? profile = null; ModeConfig? selectedMode = null;
         if (isInstall)
         {
             var profileKey = rbProfileA.Checked ? _profileItems[0].Key : _profileItems[1].Key;
             if (!_config.Profiles.TryGetValue(profileKey, out profile)) { Warn(L("err_profile_invalid")); return; }
-            selectedModes = new(); for (var i = 0; i < clbModes.CheckedItems.Count; i++) { var idx = clbModes.Items.IndexOf(clbModes.CheckedItems[i]!); if (idx >= 0 && idx < _modeItems.Count) { if (profile.Modes.TryGetValue(_modeItems[idx].Key, out var m)) selectedModes.Add(m); } }
-            if (selectedModes.Count == 0) { Warn(L("err_no_modes_checked")); return; }
+            selectedMode = GetSelectedMode();
+            if (selectedMode == null) { Warn(L("err_no_modes_checked")); return; }
         }
         else { if (_config.UninstallFiles == null || _config.UninstallFiles.Length == 0) { Warn(L("err_config_empty") + " UninstallFiles"); return; } }
 
@@ -414,12 +420,12 @@ public sealed partial class MainForm : Form
         if (string.IsNullOrEmpty(warningText)) warningText = isInstall ? L("warn_default_install") : L("warn_default_uninstall");
         if (MessageBox.Show(this, warningText, L("warn_title"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
 
-        SetRunning(true); InitBottomProgress(maps.Count); OpenLogWindow();
+        SetRunning(true); OpenLogWindow();
         _cts = new CancellationTokenSource(); var mpq = new MpqEditor(exePath, baseDir); var progress = new Progress<ProgressReport>(ReportProgress);
         Task.Run(async () =>
         {
             BatchSummary totalSummary = new() { Total = maps.Count };
-            if (isInstall) { foreach (var mode in selectedModes!) { var result = await BatchProcessor.RunInstallAsync(maps, _config!, profile!, mode, mpq, progress, _cts.Token); if (result.Aborted) { totalSummary.Aborted = true; break; } totalSummary.Success = Math.Max(totalSummary.Success, result.Success); totalSummary.Failed = Math.Max(totalSummary.Failed, result.Failed); if (result.Cancelled) { totalSummary.Cancelled = true; break; } } }
+            if (isInstall) { var result = await BatchProcessor.RunInstallAsync(maps, _config!, profile!, selectedMode!, mpq, progress, _cts.Token); totalSummary = result; }
             else { var result = await BatchProcessor.RunUninstallAsync(maps, _config!, mpq, progress, _cts.Token); totalSummary = result; }
             return totalSummary;
         }).ContinueWith(t => { if (t.IsFaulted) Invoke(() => { AppendLog(t.Exception?.InnerException?.Message ?? t.Exception?.Message ?? "Unknown error"); SetRunning(false); }); else Invoke(() => OnFinished(t.Result)); }, TaskScheduler.Default);
@@ -439,17 +445,15 @@ public sealed partial class MainForm : Form
     {
         switch (r.Kind)
         {
-            case ProgressKind.Started: bottomProgress.Maximum = Math.Max(1, r.Total); bottomProgress.Value = 0; lblBottomProgress.Text = $"0/{r.Total}"; AppendLog(r.LogLine); break;
+            case ProgressKind.Started: AppendLog(r.LogLine); break;
             case ProgressKind.Step: break;
-            case ProgressKind.MapOk: case ProgressKind.MapFail: case ProgressKind.MapPermissionFail: if (r.Index >= 0) { bottomProgress.Value = Math.Min(r.Index, bottomProgress.Maximum); lblBottomProgress.Text = $"{r.Index}/{r.Total}"; } AppendLog(r.LogLine); break;
+            case ProgressKind.MapOk: case ProgressKind.MapFail: case ProgressKind.MapPermissionFail: AppendLog(r.LogLine); break;
             case ProgressKind.MpqMissing: AppendLog(r.StatusMessage); break;
-            case ProgressKind.Completed: bottomProgress.Value = bottomProgress.Maximum; lblBottomProgress.Text = $"{r.Total}/{r.Total}"; AppendLog(r.LogLine); break;
+            case ProgressKind.Completed: AppendLog(r.LogLine); break;
             case ProgressKind.Cancelled: AppendLog(r.LogLine); break;
         }
     }
 
-    private void ResetBottomProgress() { bottomProgress.Maximum = 100; bottomProgress.Value = 0; lblBottomProgress.Text = "0/0"; }
-    private void InitBottomProgress(int total) { bottomProgress.Maximum = total; bottomProgress.Value = 0; lblBottomProgress.Text = $"0/{total}"; }
     private void OpenLogWindow() { if (_logForm == null || _logForm.IsDisposed) { _logForm = new(); _logForm.FormClosed += (_, _) => _logForm = null; } _logForm.Show(); }
     private void ShowLogWindow() { OpenLogWindow(); _logForm!.BringToFront(); }
     private void AppendLog(string line) { if (string.IsNullOrEmpty(line)) return; _logForm?.AppendLog(line); }
@@ -458,7 +462,7 @@ public sealed partial class MainForm : Form
     { if (_config == null) return new(); var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase); foreach (var pattern in _config.MapExtensions) { try { foreach (var f in Directory.EnumerateFiles(folder, pattern, SearchOption.TopDirectoryOnly)) set.Add(f); } catch { } } return set.OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList(); }
 
     private void SetRunning(bool running)
-    { _running = running; cboLanguage.Enabled = !running; btnReloadConfig.Enabled = !running; rbInstall.Enabled = !running; rbUninstall.Enabled = !running; var installMode = rbInstall.Checked; var configOk = _config != null && _profileItems.Count >= 2; rbProfileA.Enabled = !running && installMode && configOk; rbProfileB.Enabled = !running && installMode && configOk; clbModes.Enabled = !running && installMode && configOk; btnSingleMap.Enabled = !running && configOk; btnFolder.Enabled = !running && configOk; btnCancel.Visible = running; }
+    { _running = running; cboLanguage.Enabled = !running; rbInstall.Enabled = !running; rbUninstall.Enabled = !running; var installMode = rbInstall.Checked; var configOk = _config != null && _profileItems.Count >= 2; rbProfileA.Enabled = !running && installMode && configOk; rbProfileB.Enabled = !running && installMode && configOk; EnableModes(!running && installMode && configOk); btnSingleMap.Enabled = !running && configOk; btnFolder.Enabled = !running && configOk; btnCancel.Visible = running; }
 
     private void Warn(string msg) => MessageBox.Show(this, msg, L("app_title"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
     private static string L(string key) => LanguageManager.Get(key);
