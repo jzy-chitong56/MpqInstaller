@@ -1,10 +1,8 @@
 using System;
 using System.Globalization;
 using System.Windows.Forms;
-using MpqInstaller.UI;
-using MpqInstaller.i18n;
 
-namespace MpqInstaller;
+namespace MpqInstaller.Core;
 
 internal static class Program
 {
