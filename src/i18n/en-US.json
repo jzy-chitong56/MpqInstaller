@@ -1,0 +1,70 @@
+{
+  "step_htsize": "Setting MPQ hash table size ({0})",
+  "step_add": "Writing {0} -> {1}",
+  "step_delete": "Deleting {0}",
+  "step_flush": "Flushing MPQ",
+
+  "err_mpq_missing": "MPQEditor.exe not found: {0}",
+  "err_config_not_found": "Config not found: {0}",
+  "err_config_empty": "Config is empty",
+  "err_config_parse": "Config parse error: {0}",
+  "err_config_generic": "Error reading config: {0}",
+  "err_no_target": "Select a map file or folder first",
+  "err_no_maps_in_folder": "No maps found in folder",
+  "err_no_profiles": "No profiles in config",
+  "err_profile_invalid": "Selected profile is invalid",
+  "err_mode_invalid": "Selected mode is invalid",
+  "err_no_modes_checked": "Check at least one install mode",
+
+  "status_started": "Processing {0} map(s)",
+  "status_step": "[{0}/{1}] {2} {3}",
+  "status_map_ok": "[{0}/{1}] Done: {2}",
+  "status_map_fail": "[{0}/{1}] Failed: {2}",
+  "status_completed": "Done. Success: {0}, Failed: {1}",
+  "status_cancelled": "Cancelled. Success: {0}, Failed: {1}",
+
+  "log_started": "===== Started ({0} map(s)) =====",
+  "log_map_ok": "[{0}/{1}] OK: {2}",
+  "log_map_fail": "[{0}/{1}] FAILED: {2} (exit {3})",
+  "log_map_permission_fail": "[{0}/{1}] FAILED: {2} (permission)",
+  "log_completed": "===== Finished: success {0}, failed {1} =====",
+  "log_cancelled": "===== Cancelled: success {0}, failed {1} =====",
+  "reason_permission": "Map is in a UAC-protected location or locked by the game",
+
+  "app_title": "MPQ Map Installer",
+  "title_version": "v 1.0  By JZY",
+
+  "lbl_config_status": "Config: ",
+  "config_loaded_ok": "Loaded",
+  "config_load_failed": "Load failed",
+  "btn_reload_config": "Reload config",
+
+  "lbl_operation": "Operation",
+  "op_install": "Install (write)",
+  "op_uninstall": "Uninstall (delete)",
+
+  "lbl_profile": "Version",
+
+  "lbl_mode": "Install Mode",
+
+  "btn_single_map": "Single Map",
+  "btn_folder": "Folder",
+  "btn_show_log": "View Log",
+  "btn_cancel": "Cancel",
+
+  "warn_title": "Warning",
+  "warn_default_install": "You are about to write files into the selected map(s).\n\n• Map files are modified in place — back up first\n• If a map is UAC-protected or locked, the write fails\n• Batch mode modifies every matching map in the folder\n\nContinue?",
+  "warn_default_uninstall": "You are about to delete files from the selected map(s).\n\n• Map files are modified in place — back up first\n• Deleted files cannot be recovered\n\nContinue?",
+
+  "dlg_select_folder": "Select map folder",
+  "dlg_select_map": "Select a map file",
+  "filter_maps": "Map files|*.w3x;*.w3m|All files|*.*",
+
+  "summary_done": "Done. Total {2}, success {0}, failed {1}",
+  "summary_cancelled": "Cancelled. Total {2}, success {0}, failed {1}",
+
+  "log_window_title": "Process Log",
+  "log_close": "Close",
+
+  "maps_found_info": "{0} map(s) found"
+}

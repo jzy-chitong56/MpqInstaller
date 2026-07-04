@@ -1,0 +1,70 @@
+{
+  "step_htsize": "设置 MPQ 哈希表大小 ({0})",
+  "step_add": "写入 {0} -> {1}",
+  "step_delete": "删除 {0}",
+  "step_flush": "刷新 MPQ",
+
+  "err_mpq_missing": "未找到 MPQEditor.exe：{0}",
+  "err_config_not_found": "未找到配置文件：{0}",
+  "err_config_empty": "配置文件内容为空",
+  "err_config_parse": "配置文件解析失败：{0}",
+  "err_config_generic": "读取配置出错：{0}",
+  "err_no_target": "请先选择地图文件或文件夹",
+  "err_no_maps_in_folder": "文件夹中没有找到地图",
+  "err_no_profiles": "配置中没有 Profile",
+  "err_profile_invalid": "所选 Profile 无效",
+  "err_mode_invalid": "所选 Mode 无效",
+  "err_no_modes_checked": "请至少勾选一个安装模式",
+
+  "status_started": "开始处理 {0} 张地图",
+  "status_step": "[{0}/{1}] {2} {3}",
+  "status_map_ok": "[{0}/{1}] 完成：{2}",
+  "status_map_fail": "[{0}/{1}] 失败：{2}",
+  "status_completed": "完成。成功 {0}，失败 {1}",
+  "status_cancelled": "已取消。成功 {0}，失败 {1}",
+
+  "log_started": "===== 开始（共 {0} 张）=====",
+  "log_map_ok": "[{0}/{1}] 成功：{2}",
+  "log_map_fail": "[{0}/{1}] 失败：{2}（错误码 {3}）",
+  "log_map_permission_fail": "[{0}/{1}] 失败：{2}（权限/UAC）",
+  "log_completed": "===== 完成：成功 {0}，失败 {1} =====",
+  "log_cancelled": "===== 已取消：成功 {0}，失败 {1} =====",
+  "reason_permission": "地图位于 UAC 受保护目录或被游戏占用，请移至非受保护目录重试",
+
+  "app_title": "对战图增量功能安装器",
+  "title_version": "v 1.0  By JZY",
+
+  "lbl_config_status": "配置：",
+  "config_loaded_ok": "已加载",
+  "config_load_failed": "加载失败",
+  "btn_reload_config": "重新加载配置",
+
+  "lbl_operation": "操作",
+  "op_install": "安装（写入）",
+  "op_uninstall": "卸载（删除）",
+
+  "lbl_profile": "版本",
+
+  "lbl_mode": "安装模式",
+
+  "btn_single_map": "单张地图",
+  "btn_folder": "文件夹",
+  "btn_show_log": "查看日志",
+  "btn_cancel": "取消",
+
+  "warn_title": "操作前预警",
+  "warn_default_install": "即将向选定地图写入文件。\n\n• 地图文件会被直接修改，建议先备份\n• 若地图位于 UAC 受保护目录或正被占用，将写入失败\n• 批量处理会修改文件夹内所有匹配的地图\n\n确认继续？",
+  "warn_default_uninstall": "即将从选定地图删除指定文件。\n\n• 地图文件会被直接修改，建议先备份\n• 删除的文件不可恢复\n\n确认继续？",
+
+  "dlg_select_folder": "选择地图文件夹",
+  "dlg_select_map": "选择地图文件",
+  "filter_maps": "地图文件|*.w3x;*.w3m|所有文件|*.*",
+
+  "summary_done": "处理完成。共 {2} 张，成功 {0}，失败 {1}",
+  "summary_cancelled": "已取消。共 {2} 张，成功 {0}，失败 {1}",
+
+  "log_window_title": "处理日志",
+  "log_close": "关闭",
+
+  "maps_found_info": "找到 {0} 张地图"
+}
