@@ -1,0 +1,84 @@
+{
+  "MpqEditorPath": "MPQEditor.exe",
+  "FilesBaseDir": "Files",
+  "HashTableSize": 128,
+  "MapExtensions": [ "*.w3x", "*.w3m" ],
+
+  "UninstallFiles": [
+    "Scripts\\common.ai",
+    "Scripts\\elf.ai",
+    "Scripts\\human.ai",
+    "Scripts\\orc.ai",
+    "Scripts\\undead.ai",
+    "Scripts\\Blizzard.j"
+  ],
+
+  "WarningTexts": {
+    "zh-CN": "即将向选定的地图写入文件。\n\n• 地图文件会被直接修改，建议先备份\n• 若地图位于 UAC 受保护目录或正被占用，将写入失败\n• 批量处理会修改文件夹内所有匹配的地图\n\n确认继续？",
+    "en-US": "You are about to write files into the selected map(s).\n\n• Map files are modified in place — back up first\n• If a map is UAC-protected or locked, the write fails\n• Batch mode modifies every matching map in the folder\n\nContinue?"
+  },
+
+  "Profiles": {
+    "Classic": {
+      "DisplayName": { "zh-CN": "经典版 (1.2x~1.31)", "en-US": "Classic (1.2x~1.31)" },
+      "SubDir": "Classic",
+      "BaseActions": [
+        { "Source": "*.ai", "Dest": "Scripts" }
+      ],
+      "Modes": {
+        "ItemIcon": {
+          "DisplayName": { "zh-CN": "安装W3C物品图标", "en-US": "Install W3C item icons" },
+          "ExtraActions": [
+            { "Source": "items\\*.blp", "Dest": "war3mapMap.blp" }
+          ]
+        },
+        "MinimapIcon": {
+          "DisplayName": { "zh-CN": "安装W3C小地图图标", "en-US": "Install W3C minimap icons" },
+          "ExtraActions": [
+            { "Source": "minimap\\*.blp", "Dest": "war3mapMap.blp" }
+          ]
+        },
+        "HeroHire": {
+          "DisplayName": { "zh-CN": "随机英雄+雇佣兵", "en-US": "Random hero + mercenaries" },
+          "ExtraActions": [
+            { "Source": "hero\\*.j", "Dest": "Scripts" }
+          ]
+        }
+      }
+    },
+    "Reforged": {
+      "DisplayName": { "zh-CN": "重制版 (1.33+)", "en-US": "Reforged (1.33+)" },
+      "SubDir": "Reforged",
+      "BaseActions": [
+        { "Source": "*.ai", "Dest": "Scripts" }
+      ],
+      "Modes": {
+        "ItemIcon": {
+          "DisplayName": { "zh-CN": "安装W3C物品图标", "en-US": "Install W3C item icons" },
+          "ExtraActions": [
+            { "Source": "items\\*.blp", "Dest": "war3mapMap.blp" }
+          ]
+        },
+        "MinimapIcon": {
+          "DisplayName": { "zh-CN": "安装W3C小地图图标", "en-US": "Install W3C minimap icons" },
+          "ExtraActions": [
+            { "Source": "minimap\\*.blp", "Dest": "war3mapMap.blp" }
+          ]
+        },
+        "HeroHire": {
+          "DisplayName": { "zh-CN": "随机英雄+雇佣兵", "en-US": "Random hero + mercenaries" },
+          "ExtraActions": [
+            { "Source": "hero\\*.j", "Dest": "Scripts" }
+          ]
+        },
+        "SkillMechanic": {
+          "DisplayName": { "zh-CN": "随机英雄+雇佣兵+随机技能（仅限重制版）", "en-US": "Random hero + merc + skills (Reforged only)" },
+          "ExtraActions": [
+            { "Source": "hero\\*.j", "Dest": "Scripts" },
+            { "Source": "skill\\*.j", "Dest": "Scripts" }
+          ]
+        }
+      }
+    }
+  }
+}
