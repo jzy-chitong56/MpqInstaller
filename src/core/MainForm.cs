@@ -851,7 +851,6 @@ namespace MpqInstaller.Core
         {
             string title = L("app_title") + " v" + AppVersion;
             Text = title;
-            lblTitle.Text = title;
 
             lblOperation.Text = L("lbl_operation");
             rbInstall.Text = L("op_install");
@@ -1219,7 +1218,9 @@ namespace MpqInstaller.Core
             bool configOk = _config != null && _profileItems.Count >= 2;
             rbProfileA.Enabled = !running && installMode && configOk;
             rbProfileB.Enabled = !running && installMode && configOk;
-            pnlIconGroup.Enabled = !running && installMode && configOk;
+            cbIconNone.Enabled = !running && installMode && configOk;
+            cbIconItem.Enabled = !running && installMode && configOk;
+            cbIconMinimap.Enabled = !running && installMode && configOk;
             pnlHeroGroup.Enabled = !running && installMode && configOk;
             btnSingleMap.Enabled = !running && configOk;
             btnFolder.Enabled = !running && configOk;
