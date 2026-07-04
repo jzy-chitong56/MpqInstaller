@@ -24,6 +24,7 @@ namespace MpqInstaller.Core
     public class ModeConfig
     {
         public Dictionary<string, string> DisplayName { get; set; }
+        public string Group { get; set; }
         public WriteActionConfig[] ExtraActions { get; set; }
     }
 

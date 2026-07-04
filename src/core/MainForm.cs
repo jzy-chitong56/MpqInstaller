@@ -303,7 +303,7 @@ namespace MpqInstaller.Core
 
     public static class InstallPlanBuilder
     {
-        public static List<InstallAction> BuildInstall(MpqEditor mpq, InstallConfig config, ProfileConfig profile, ModeConfig mode, string map)
+        public static List<InstallAction> BuildInstall(MpqEditor mpq, InstallConfig config, ProfileConfig profile, ModeConfig[] modes, string map)
         {
             List<InstallAction> plan = new List<InstallAction>();
             plan.Add(new InstallAction(ActionType.HtSize, map, string.Empty, string.Empty, config.HashTableSize,
@@ -315,13 +315,15 @@ namespace MpqInstaller.Core
                     plan.Add(new InstallAction(ActionType.Add, map, src, a.Dest, 0,
                         LanguageManager.GetFormat("step_add", a.Source, a.Dest)));
                 }
-            if (mode.ExtraActions != null)
-                foreach (WriteActionConfig a in mode.ExtraActions)
-                {
-                    string src = mpq.ResolveSource(profile.SubDir, a.Source);
-                    plan.Add(new InstallAction(ActionType.Add, map, src, a.Dest, 0,
-                        LanguageManager.GetFormat("step_add", a.Source, a.Dest)));
-                }
+            if (modes != null)
+                foreach (ModeConfig mode in modes)
+                    if (mode != null && mode.ExtraActions != null)
+                        foreach (WriteActionConfig a in mode.ExtraActions)
+                        {
+                            string src = mpq.ResolveSource(profile.SubDir, a.Source);
+                            plan.Add(new InstallAction(ActionType.Add, map, src, a.Dest, 0,
+                                LanguageManager.GetFormat("step_add", a.Source, a.Dest)));
+                        }
             plan.Add(new InstallAction(ActionType.Flush, map, string.Empty, string.Empty, 0, LanguageManager.Get("step_flush")));
             return plan;
         }
@@ -366,7 +368,7 @@ namespace MpqInstaller.Core
     public static class BatchProcessor
     {
         public static async Task<BatchSummary> RunInstallAsync(
-            IList<string> maps, InstallConfig config, ProfileConfig profile, ModeConfig mode,
+            IList<string> maps, InstallConfig config, ProfileConfig profile, ModeConfig[] modes,
             MpqEditor mpq, IProgress<ProgressReport> progress, CancellationToken ct)
         {
             BatchSummary summary = new BatchSummary { Total = maps.Count };
@@ -388,7 +390,7 @@ namespace MpqInstaller.Core
                     string map = maps[i];
                     string mapName = Path.GetFileName(map);
                     int idx = i + 1;
-                    List<InstallAction> plan = InstallPlanBuilder.BuildInstall(mpq, config, profile, mode, map);
+                    List<InstallAction> plan = InstallPlanBuilder.BuildInstall(mpq, config, profile, modes, map);
                     bool permFail = false;
                     int lastNonZero = 0;
                     string failOut = string.Empty;
@@ -551,32 +553,50 @@ namespace MpqInstaller.Core
 
     public sealed class MainForm : Form
     {
+        private const string AppVersion = "1.0.0";
+        private const string AppAuthor = "MPQ Installer";
+
         private System.ComponentModel.IContainer components = null;
         private Panel pnlTitle;
+        private Label lblTitle;
+        private Button btnShowLog;
         private ComboBox cboLanguage;
+
         private Label lblOperation;
         private RadioButton rbInstall;
         private RadioButton rbUninstall;
         private Panel pnlSep1;
+
         private Label lblProfile;
         private RadioButton rbProfileA;
         private RadioButton rbProfileB;
         private Panel pnlSep2;
-        private Label lblMode;
-        private RadioButton[] rbModes;
+
+        private Label lblIconMode;
+        private Panel pnlIconGroup;
+        private RadioButton rbIconNone;
+        private RadioButton rbIconItem;
+        private RadioButton rbIconMinimap;
+
+        private Label lblHeroMode;
+        private Panel pnlHeroGroup;
+        private RadioButton rbHeroNone;
+        private RadioButton rbHeroHire;
+        private RadioButton rbHeroSkill;
+
         private Panel pnlSep3;
+        private Label lblProgress;
         private Button btnSingleMap;
         private Button btnFolder;
         private Button btnCancel;
-        private Button btnShowLog;
 
         private bool _initializing = true;
         private bool _running;
         private CancellationTokenSource _cts;
         private InstallConfig _config;
-        private string _configError = string.Empty;
         private List<ProfileItem> _profileItems = new List<ProfileItem>();
-        private List<ModeItem> _modeItems = new List<ModeItem>();
+        private string _iconModeKey = string.Empty;
+        private string _heroModeKey = string.Empty;
         private LogForm _logForm;
 
         public MainForm()
@@ -586,6 +606,7 @@ namespace MpqInstaller.Core
             LoadConfig();
             ApplyLanguage();
             _initializing = false;
+            RefreshProfileAndModeDisplay();
             WireEvents();
             UpdateUiEnabledState();
         }
@@ -600,91 +621,198 @@ namespace MpqInstaller.Core
         {
             components = new System.ComponentModel.Container();
             pnlTitle = new Panel();
+            lblTitle = new Label();
             cboLanguage = new ComboBox();
+            btnShowLog = new Button();
+
             lblOperation = new Label();
             rbInstall = new RadioButton();
             rbUninstall = new RadioButton();
             pnlSep1 = new Panel();
+
             lblProfile = new Label();
             rbProfileA = new RadioButton();
             rbProfileB = new RadioButton();
             pnlSep2 = new Panel();
-            lblMode = new Label();
+
+            lblIconMode = new Label();
+            pnlIconGroup = new Panel();
+            rbIconNone = new RadioButton();
+            rbIconItem = new RadioButton();
+            rbIconMinimap = new RadioButton();
+
+            lblHeroMode = new Label();
+            pnlHeroGroup = new Panel();
+            rbHeroNone = new RadioButton();
+            rbHeroHire = new RadioButton();
+            rbHeroSkill = new RadioButton();
+
             pnlSep3 = new Panel();
+            lblProgress = new Label();
             btnSingleMap = new Button();
             btnFolder = new Button();
             btnCancel = new Button();
-            btnShowLog = new Button();
+
             SuspendLayout();
 
             pnlTitle.BackColor = Color.FromArgb(0, 120, 215);
             pnlTitle.Dock = DockStyle.Top;
-            pnlTitle.Size = new Size(420, 40);
+            pnlTitle.Size = new Size(560, 44);
+
+            lblTitle.Font = new Font("微软雅黑", 11F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.White;
+            lblTitle.Location = new Point(14, 11);
+            lblTitle.Size = new Size(300, 22);
+            lblTitle.Text = "MPQ Map Installer";
+
+            btnShowLog.FlatStyle = FlatStyle.Flat;
+            btnShowLog.Font = new Font("微软雅黑", 9F);
+            btnShowLog.ForeColor = Color.White;
+            btnShowLog.Location = new Point(356, 9);
+            btnShowLog.Size = new Size(90, 26);
+            btnShowLog.Text = "查看日志";
+            btnShowLog.FlatAppearance.BorderColor = Color.FromArgb(0, 120, 215);
+            btnShowLog.BackColor = Color.FromArgb(0, 120, 215);
+
             cboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
             cboLanguage.FlatStyle = FlatStyle.Flat;
             cboLanguage.Font = new Font("微软雅黑", 9F);
-            cboLanguage.Location = new Point(316, 8);
+            cboLanguage.Location = new Point(456, 10);
             cboLanguage.Size = new Size(90, 25);
+
+            pnlTitle.Controls.Add(lblTitle);
+            pnlTitle.Controls.Add(btnShowLog);
             pnlTitle.Controls.Add(cboLanguage);
 
             lblOperation.Font = new Font("微软雅黑", 10F, FontStyle.Bold);
             lblOperation.ForeColor = Color.FromArgb(50, 50, 50);
-            lblOperation.Location = new Point(12, 50);
+            lblOperation.Location = new Point(12, 54);
             lblOperation.Size = new Size(120, 20);
+            lblOperation.Text = "操作";
+
             rbInstall.Font = new Font("微软雅黑", 9F);
-            rbInstall.Location = new Point(24, 77);
+            rbInstall.Location = new Point(28, 81);
             rbInstall.AutoSize = true;
             rbInstall.Checked = true;
+            rbInstall.Text = "安装（写入）";
+
             rbUninstall.Font = new Font("微软雅黑", 9F);
-            rbUninstall.Location = new Point(230, 77);
+            rbUninstall.Location = new Point(280, 81);
             rbUninstall.AutoSize = true;
+            rbUninstall.Text = "卸载（删除）";
+
             pnlSep1.BackColor = Color.FromArgb(225, 225, 225);
-            pnlSep1.Location = new Point(12, 110);
-            pnlSep1.Size = new Size(396, 1);
+            pnlSep1.Location = new Point(12, 114);
+            pnlSep1.Size = new Size(536, 1);
 
             lblProfile.Font = new Font("微软雅黑", 10F, FontStyle.Bold);
             lblProfile.ForeColor = Color.FromArgb(50, 50, 50);
-            lblProfile.Location = new Point(12, 120);
+            lblProfile.Location = new Point(12, 125);
             lblProfile.Size = new Size(120, 20);
+            lblProfile.Text = "版本";
+
             rbProfileA.Font = new Font("微软雅黑", 9F);
-            rbProfileA.Location = new Point(24, 147);
+            rbProfileA.Location = new Point(28, 152);
             rbProfileA.AutoSize = true;
             rbProfileA.Checked = true;
-            rbProfileB.Font = new Font("微软雅黑", 9F);
-            rbProfileB.Location = new Point(230, 147);
-            rbProfileB.AutoSize = true;
-            pnlSep2.BackColor = Color.FromArgb(225, 225, 225);
-            pnlSep2.Location = new Point(12, 180);
-            pnlSep2.Size = new Size(396, 1);
+            rbProfileA.Text = "—";
 
-            lblMode.Font = new Font("微软雅黑", 10F, FontStyle.Bold);
-            lblMode.ForeColor = Color.FromArgb(50, 50, 50);
-            lblMode.Location = new Point(12, 190);
-            lblMode.Size = new Size(120, 20);
+            rbProfileB.Font = new Font("微软雅黑", 9F);
+            rbProfileB.Location = new Point(280, 152);
+            rbProfileB.AutoSize = true;
+            rbProfileB.Text = "—";
+
+            pnlSep2.BackColor = Color.FromArgb(225, 225, 225);
+            pnlSep2.Location = new Point(12, 185);
+            pnlSep2.Size = new Size(536, 1);
+
+            lblIconMode.Font = new Font("微软雅黑", 10F, FontStyle.Bold);
+            lblIconMode.ForeColor = Color.FromArgb(50, 50, 50);
+            lblIconMode.Location = new Point(12, 196);
+            lblIconMode.Size = new Size(120, 20);
+            lblIconMode.Text = "图标模式";
+
+            pnlIconGroup.Location = new Point(12, 219);
+            pnlIconGroup.Size = new Size(536, 28);
+
+            rbIconNone.Font = new Font("微软雅黑", 9F);
+            rbIconNone.Location = new Point(16, 2);
+            rbIconNone.AutoSize = true;
+            rbIconNone.Checked = true;
+            rbIconNone.Text = "不安装";
+            pnlIconGroup.Controls.Add(rbIconNone);
+
+            rbIconItem.Font = new Font("微软雅黑", 9F);
+            rbIconItem.Location = new Point(120, 2);
+            rbIconItem.AutoSize = true;
+            rbIconItem.Text = "物品图标";
+            pnlIconGroup.Controls.Add(rbIconItem);
+
+            rbIconMinimap.Font = new Font("微软雅黑", 9F);
+            rbIconMinimap.Location = new Point(260, 2);
+            rbIconMinimap.AutoSize = true;
+            rbIconMinimap.Text = "小地图图标";
+            pnlIconGroup.Controls.Add(rbIconMinimap);
+
+            lblHeroMode.Font = new Font("微软雅黑", 10F, FontStyle.Bold);
+            lblHeroMode.ForeColor = Color.FromArgb(50, 50, 50);
+            lblHeroMode.Location = new Point(12, 256);
+            lblHeroMode.Size = new Size(120, 20);
+            lblHeroMode.Text = "随机英雄";
+
+            pnlHeroGroup.Location = new Point(12, 279);
+            pnlHeroGroup.Size = new Size(536, 28);
+
+            rbHeroNone.Font = new Font("微软雅黑", 9F);
+            rbHeroNone.Location = new Point(16, 2);
+            rbHeroNone.AutoSize = true;
+            rbHeroNone.Checked = true;
+            rbHeroNone.Text = "不启用";
+            pnlHeroGroup.Controls.Add(rbHeroNone);
+
+            rbHeroHire.Font = new Font("微软雅黑", 9F);
+            rbHeroHire.Location = new Point(120, 2);
+            rbHeroHire.AutoSize = true;
+            rbHeroHire.Text = "随机英雄+雇佣兵";
+            pnlHeroGroup.Controls.Add(rbHeroHire);
+
+            rbHeroSkill.Font = new Font("微软雅黑", 9F);
+            rbHeroSkill.Location = new Point(260, 2);
+            rbHeroSkill.AutoSize = true;
+            rbHeroSkill.Text = "随机英雄+雇佣兵+随机技能";
+            pnlHeroGroup.Controls.Add(rbHeroSkill);
+
             pnlSep3.BackColor = Color.FromArgb(225, 225, 225);
-            pnlSep3.Location = new Point(12, 310);
-            pnlSep3.Size = new Size(396, 1);
+            pnlSep3.Location = new Point(12, 320);
+            pnlSep3.Size = new Size(536, 1);
+
+            lblProgress.Font = new Font("微软雅黑", 9F);
+            lblProgress.ForeColor = Color.FromArgb(80, 80, 80);
+            lblProgress.Location = new Point(12, 330);
+            lblProgress.Size = new Size(536, 18);
+            lblProgress.Text = " ";
+            lblProgress.TextAlign = ContentAlignment.MiddleCenter;
 
             btnSingleMap.Font = new Font("微软雅黑", 11F);
-            btnSingleMap.Location = new Point(12, 328);
-            btnSingleMap.Size = new Size(195, 48);
+            btnSingleMap.Location = new Point(12, 362);
+            btnSingleMap.Size = new Size(260, 48);
             btnSingleMap.FlatStyle = FlatStyle.System;
+            btnSingleMap.Text = "单张地图";
+
             btnFolder.Font = new Font("微软雅黑", 11F);
-            btnFolder.Location = new Point(213, 328);
-            btnFolder.Size = new Size(195, 48);
+            btnFolder.Location = new Point(288, 362);
+            btnFolder.Size = new Size(260, 48);
             btnFolder.FlatStyle = FlatStyle.System;
+            btnFolder.Text = "文件夹";
+
             btnCancel.Font = new Font("微软雅黑", 9F);
-            btnCancel.Location = new Point(12, 390);
+            btnCancel.Location = new Point(240, 426);
             btnCancel.Size = new Size(80, 26);
             btnCancel.Visible = false;
-            btnShowLog.Font = new Font("微软雅黑", 9F);
-            btnShowLog.ForeColor = Color.FromArgb(0, 120, 215);
-            btnShowLog.FlatStyle = FlatStyle.Flat;
-            btnShowLog.Location = new Point(320, 390);
-            btnShowLog.Size = new Size(88, 26);
+            btnCancel.Text = "取消";
 
             AutoScaleMode = AutoScaleMode.Dpi;
-            ClientSize = new Size(420, 450);
+            ClientSize = new Size(560, 470);
             Controls.Add(pnlTitle);
             Controls.Add(lblOperation);
             Controls.Add(rbInstall);
@@ -694,18 +822,21 @@ namespace MpqInstaller.Core
             Controls.Add(rbProfileA);
             Controls.Add(rbProfileB);
             Controls.Add(pnlSep2);
-            Controls.Add(lblMode);
+            Controls.Add(lblIconMode);
+            Controls.Add(pnlIconGroup);
+            Controls.Add(lblHeroMode);
+            Controls.Add(pnlHeroGroup);
             Controls.Add(pnlSep3);
+            Controls.Add(lblProgress);
             Controls.Add(btnSingleMap);
             Controls.Add(btnFolder);
             Controls.Add(btnCancel);
-            Controls.Add(btnShowLog);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = true;
             StartPosition = FormStartPosition.CenterScreen;
-            MinimumSize = new Size(420, 450);
-            MaximumSize = new Size(420, 450);
+            MinimumSize = new Size(560, 470);
+            MaximumSize = new Size(560, 470);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -733,12 +864,16 @@ namespace MpqInstaller.Core
 
         private void ApplyLanguage()
         {
-            Text = L("app_title");
+            string title = L("app_title") + " v" + AppVersion;
+            Text = title;
+            lblTitle.Text = title;
+
             lblOperation.Text = L("lbl_operation");
             rbInstall.Text = L("op_install");
             rbUninstall.Text = L("op_uninstall");
             lblProfile.Text = L("lbl_profile");
-            lblMode.Text = L("lbl_mode");
+            lblIconMode.Text = L("lbl_icon_mode");
+            lblHeroMode.Text = L("lbl_hero_mode");
             btnSingleMap.Text = L("btn_single_map");
             btnFolder.Text = L("btn_folder");
             btnShowLog.Text = L("btn_show_log");
@@ -774,40 +909,32 @@ namespace MpqInstaller.Core
             bool configOk = _config != null && _profileItems.Count >= 2;
             rbProfileA.Enabled = installMode && configOk;
             rbProfileB.Enabled = installMode && configOk;
-            EnableModes(installMode && configOk);
+            pnlIconGroup.Enabled = installMode && configOk;
+            pnlHeroGroup.Enabled = installMode && configOk;
             btnSingleMap.Enabled = !_running && configOk;
             btnFolder.Enabled = !_running && configOk;
             btnCancel.Visible = _running;
         }
 
-        private void EnableModes(bool enabled)
-        {
-            if (rbModes != null)
-                foreach (RadioButton rb in rbModes) rb.Enabled = enabled;
-        }
-
         private void LoadConfig()
         {
             _profileItems.Clear();
-            _modeItems.Clear();
             InstallConfig cfg;
             string err;
             if (ConfigLoader.TryLoad(ConfigLoader.DefaultPath, out cfg, out err))
             {
                 _config = cfg;
-                _configError = string.Empty;
             }
-            else { _config = null; _configError = err; return; }
+            else { _config = null; return; }
             foreach (KeyValuePair<string, ProfileConfig> kv in cfg.Profiles)
                 _profileItems.Add(new ProfileItem(kv.Key, ConfigLoader.GetDisplayName(kv.Value.DisplayName, kv.Key)));
             if (_profileItems.Count < 2) { _config = null; return; }
-            if (!_initializing) RefreshProfileAndModeDisplay();
         }
 
         private void RefreshProfileAndModeDisplay()
         {
             if (_config == null || _profileItems.Count < 2)
-            { rbProfileA.Text = "—"; rbProfileB.Text = "—"; ClearModes(); return; }
+            { rbProfileA.Text = "—"; rbProfileB.Text = "—"; ClearModeDisplay(); return; }
             for (int i = 0; i < _profileItems.Count; i++)
             {
                 ProfileConfig kv = _config.Profiles[_profileItems[i].Key];
@@ -822,58 +949,113 @@ namespace MpqInstaller.Core
 
         private void RefreshModesFromCurrentProfile()
         {
-            ClearModes();
+            ClearModeDisplay();
             if (_config == null || _profileItems.Count < 2) return;
             string profileKey = rbProfileA.Checked ? _profileItems[0].Key : _profileItems[1].Key;
             ProfileConfig profile;
             if (!_config.Profiles.TryGetValue(profileKey, out profile)) return;
-            List<KeyValuePair<string, ModeConfig>> modes = profile.Modes.ToList();
-            if (modes.Count == 0) return;
-            _modeItems.Clear();
-            foreach (KeyValuePair<string, ModeConfig> kv in modes)
+
+            _iconModeKey = string.Empty;
+            _heroModeKey = string.Empty;
+
+            int iconIdx = 0;
+            int heroIdx = 0;
+            foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
             {
                 string display = ConfigLoader.GetDisplayName(kv.Value.DisplayName, kv.Key);
-                _modeItems.Add(new ModeItem(kv.Key, display));
-            }
-            rbModes = new RadioButton[modes.Count];
-            int y = 217;
-            for (int i = 0; i < modes.Count; i++)
-            {
-                rbModes[i] = new RadioButton();
-                rbModes[i].Font = new Font("微软雅黑", 9F);
-                rbModes[i].Location = new Point((i % 2 == 0 ? 24 : 230), y);
-                rbModes[i].AutoSize = true;
-                rbModes[i].Text = _modeItems[i].DisplayName;
-                if (i % 2 == 1) y += 26;
-                Controls.Add(rbModes[i]);
-            }
-            if (rbModes.Length > 0) rbModes[0].Checked = true;
-        }
-
-        private void ClearModes()
-        {
-            if (rbModes != null)
-            {
-                foreach (RadioButton rb in rbModes) Controls.Remove(rb);
-                rbModes = null;
-            }
-        }
-
-        private ModeConfig GetSelectedMode()
-        {
-            if (rbModes == null || _modeItems.Count == 0) return null;
-            string profileKey = rbProfileA.Checked ? _profileItems[0].Key : _profileItems[1].Key;
-            ProfileConfig profile;
-            if (!_config.Profiles.TryGetValue(profileKey, out profile)) return null;
-            for (int i = 0; i < rbModes.Length; i++)
-            {
-                if (rbModes[i].Checked)
+                string grp = kv.Value.Group;
+                if (grp == "Icon")
                 {
-                    ModeConfig m;
-                    if (profile.Modes.TryGetValue(_modeItems[i].Key, out m)) return m;
+                    if (iconIdx == 0) { rbIconItem.Text = display; _iconModeKey = kv.Key; }
+                    else if (iconIdx == 1) { rbIconMinimap.Text = display; }
+                    iconIdx++;
+                }
+                else if (grp == "Hero")
+                {
+                    if (heroIdx == 0) { rbHeroHire.Text = display; _heroModeKey = kv.Key; }
+                    else if (heroIdx == 1) { rbHeroSkill.Text = display; }
+                    heroIdx++;
                 }
             }
-            return null;
+            rbIconNone.Checked = true;
+            rbHeroNone.Checked = true;
+        }
+
+        private void ClearModeDisplay()
+        {
+            _iconModeKey = string.Empty;
+            _heroModeKey = string.Empty;
+            rbIconNone.Checked = true;
+            rbHeroNone.Checked = true;
+        }
+
+        private ModeConfig[] GetSelectedModes()
+        {
+            if (_config == null || _profileItems.Count < 2) return new ModeConfig[0];
+            string profileKey = rbProfileA.Checked ? _profileItems[0].Key : _profileItems[1].Key;
+            ProfileConfig profile;
+            if (!_config.Profiles.TryGetValue(profileKey, out profile)) return new ModeConfig[0];
+
+            List<ModeConfig> list = new List<ModeConfig>();
+            string iconKey = GetSelectedIconModeKey(profile);
+            if (!string.IsNullOrEmpty(iconKey))
+            {
+                ModeConfig m;
+                if (profile.Modes.TryGetValue(iconKey, out m)) list.Add(m);
+            }
+            string heroKey = GetSelectedHeroModeKey(profile);
+            if (!string.IsNullOrEmpty(heroKey))
+            {
+                ModeConfig m;
+                if (profile.Modes.TryGetValue(heroKey, out m)) list.Add(m);
+            }
+            return list.ToArray();
+        }
+
+        private string GetSelectedIconModeKey(ProfileConfig profile)
+        {
+            if (rbIconItem.Checked)
+            {
+                foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
+                    if (kv.Value.Group == "Icon")
+                        return kv.Key;
+            }
+            else if (rbIconMinimap.Checked)
+            {
+                bool first = true;
+                foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
+                {
+                    if (kv.Value.Group == "Icon")
+                    {
+                        if (first) first = false;
+                        else return kv.Key;
+                    }
+                }
+            }
+            return string.Empty;
+        }
+
+        private string GetSelectedHeroModeKey(ProfileConfig profile)
+        {
+            if (rbHeroHire.Checked)
+            {
+                foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
+                    if (kv.Value.Group == "Hero")
+                        return kv.Key;
+            }
+            else if (rbHeroSkill.Checked)
+            {
+                bool first = true;
+                foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
+                {
+                    if (kv.Value.Group == "Hero")
+                    {
+                        if (first) first = false;
+                        else return kv.Key;
+                    }
+                }
+            }
+            return string.Empty;
         }
 
         private void RunInstall(bool batchMode)
@@ -909,13 +1091,14 @@ namespace MpqInstaller.Core
             if (!File.Exists(exePath)) { Warn(LF("err_mpq_missing", exePath)); return; }
 
             ProfileConfig profile = null;
-            ModeConfig selectedMode = null;
+            ModeConfig[] selectedModes = null;
             if (isInstall)
             {
                 string profileKey = rbProfileA.Checked ? _profileItems[0].Key : _profileItems[1].Key;
                 if (!_config.Profiles.TryGetValue(profileKey, out profile)) { Warn(L("err_profile_invalid")); return; }
-                selectedMode = GetSelectedMode();
-                if (selectedMode == null) { Warn(L("err_no_modes_checked")); return; }
+                selectedModes = GetSelectedModes();
+                if (selectedModes == null || selectedModes.Length == 0)
+                { Warn(L("err_no_modes_checked")); return; }
             }
             else
             {
@@ -931,6 +1114,7 @@ namespace MpqInstaller.Core
 
             SetRunning(true);
             OpenLogWindow();
+            lblProgress.Text = LF("progress_status", 0, maps.Count);
             _cts = new CancellationTokenSource();
             MpqEditor mpq = new MpqEditor(exePath, baseDir);
             Progress<ProgressReport> progress = new Progress<ProgressReport>(ReportProgress);
@@ -939,7 +1123,7 @@ namespace MpqInstaller.Core
                 BatchSummary totalSummary = new BatchSummary { Total = maps.Count };
                 if (isInstall)
                 {
-                    BatchSummary result = await BatchProcessor.RunInstallAsync(maps, _config, profile, selectedMode, mpq, progress, _cts.Token);
+                    BatchSummary result = await BatchProcessor.RunInstallAsync(maps, _config, profile, selectedModes, mpq, progress, _cts.Token);
                     totalSummary = result;
                 }
                 else
@@ -982,6 +1166,8 @@ namespace MpqInstaller.Core
 
         private void ReportProgress(ProgressReport r)
         {
+            if (r.Index > 0 || r.Total > 0)
+                lblProgress.Text = LF("progress_status", r.Index, r.Total);
             switch (r.Kind)
             {
                 case ProgressKind.Started: AppendLog(r.LogLine); break;
@@ -1034,10 +1220,12 @@ namespace MpqInstaller.Core
             bool configOk = _config != null && _profileItems.Count >= 2;
             rbProfileA.Enabled = !running && installMode && configOk;
             rbProfileB.Enabled = !running && installMode && configOk;
-            EnableModes(!running && installMode && configOk);
+            pnlIconGroup.Enabled = !running && installMode && configOk;
+            pnlHeroGroup.Enabled = !running && installMode && configOk;
             btnSingleMap.Enabled = !running && configOk;
             btnFolder.Enabled = !running && configOk;
             btnCancel.Visible = running;
+            if (!running) lblProgress.Text = " ";
         }
 
         private void Warn(string msg) { MessageBox.Show(this, msg, L("app_title"), MessageBoxButtons.OK, MessageBoxIcon.Warning); }
@@ -1057,13 +1245,6 @@ namespace MpqInstaller.Core
             public string Key;
             public string DisplayName;
             public ProfileItem(string key, string displayName) { Key = key; DisplayName = displayName; }
-        }
-
-        private class ModeItem
-        {
-            public string Key;
-            public string DisplayName;
-            public ModeItem(string key, string displayName) { Key = key; DisplayName = displayName; }
         }
     }
 

@@ -45,7 +45,10 @@
 
   "lbl_profile": "版本",
 
-  "lbl_mode": "安装模式",
+  "lbl_icon_mode": "图标模式",
+  "lbl_hero_mode": "随机英雄",
+
+  "progress_status": "进度：{0} / {1}",
 
   "btn_single_map": "单张地图",
   "btn_folder": "文件夹",

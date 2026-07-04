@@ -45,7 +45,10 @@
 
   "lbl_profile": "Version",
 
-  "lbl_mode": "Install Mode",
+  "lbl_icon_mode": "Icon Mode",
+  "lbl_hero_mode": "Random Hero",
+
+  "progress_status": "Progress: {0} / {1}",
 
   "btn_single_map": "Single Map",
   "btn_folder": "Folder",

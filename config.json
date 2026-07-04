@@ -28,18 +28,21 @@
       "Modes": {
         "ItemIcon": {
           "DisplayName": { "zh-CN": "安装W3C物品图标", "en-US": "Install W3C item icons" },
+          "Group": "Icon",
           "ExtraActions": [
             { "Source": "items\\*.blp", "Dest": "war3mapMap.blp" }
           ]
         },
         "MinimapIcon": {
           "DisplayName": { "zh-CN": "安装W3C小地图图标", "en-US": "Install W3C minimap icons" },
+          "Group": "Icon",
           "ExtraActions": [
             { "Source": "minimap\\*.blp", "Dest": "war3mapMap.blp" }
           ]
         },
         "HeroHire": {
           "DisplayName": { "zh-CN": "随机英雄+雇佣兵", "en-US": "Random hero + mercenaries" },
+          "Group": "Hero",
           "ExtraActions": [
             { "Source": "hero\\*.j", "Dest": "Scripts" }
           ]
@@ -55,24 +58,28 @@
       "Modes": {
         "ItemIcon": {
           "DisplayName": { "zh-CN": "安装W3C物品图标", "en-US": "Install W3C item icons" },
+          "Group": "Icon",
           "ExtraActions": [
             { "Source": "items\\*.blp", "Dest": "war3mapMap.blp" }
           ]
         },
         "MinimapIcon": {
           "DisplayName": { "zh-CN": "安装W3C小地图图标", "en-US": "Install W3C minimap icons" },
+          "Group": "Icon",
           "ExtraActions": [
             { "Source": "minimap\\*.blp", "Dest": "war3mapMap.blp" }
           ]
         },
         "HeroHire": {
           "DisplayName": { "zh-CN": "随机英雄+雇佣兵", "en-US": "Random hero + mercenaries" },
+          "Group": "Hero",
           "ExtraActions": [
             { "Source": "hero\\*.j", "Dest": "Scripts" }
           ]
         },
         "SkillMechanic": {
           "DisplayName": { "zh-CN": "随机英雄+雇佣兵+随机技能（仅限重制版）", "en-US": "Random hero + merc + skills (Reforged only)" },
+          "Group": "Hero",
           "ExtraActions": [
             { "Source": "hero\\*.j", "Dest": "Scripts" },
             { "Source": "skill\\*.j", "Dest": "Scripts" }
