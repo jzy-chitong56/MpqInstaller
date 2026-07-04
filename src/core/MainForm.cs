@@ -558,7 +558,6 @@ namespace MpqInstaller.Core
 
         private System.ComponentModel.IContainer components = null;
         private Panel pnlTitle;
-        private Label lblTitle;
         private Button btnShowLog;
         private ComboBox cboLanguage;
 
@@ -573,10 +572,9 @@ namespace MpqInstaller.Core
         private Panel pnlSep2;
 
         private Label lblIconMode;
-        private Panel pnlIconGroup;
-        private RadioButton rbIconNone;
-        private RadioButton rbIconItem;
-        private RadioButton rbIconMinimap;
+        private CheckBox cbIconNone;
+        private CheckBox cbIconItem;
+        private CheckBox cbIconMinimap;
 
         private Label lblHeroMode;
         private Panel pnlHeroGroup;
@@ -621,7 +619,6 @@ namespace MpqInstaller.Core
         {
             components = new System.ComponentModel.Container();
             pnlTitle = new Panel();
-            lblTitle = new Label();
             cboLanguage = new ComboBox();
             btnShowLog = new Button();
 
@@ -636,10 +633,9 @@ namespace MpqInstaller.Core
             pnlSep2 = new Panel();
 
             lblIconMode = new Label();
-            pnlIconGroup = new Panel();
-            rbIconNone = new RadioButton();
-            rbIconItem = new RadioButton();
-            rbIconMinimap = new RadioButton();
+            cbIconNone = new CheckBox();
+            cbIconItem = new CheckBox();
+            cbIconMinimap = new CheckBox();
 
             lblHeroMode = new Label();
             pnlHeroGroup = new Panel();
@@ -659,12 +655,6 @@ namespace MpqInstaller.Core
             pnlTitle.Dock = DockStyle.Top;
             pnlTitle.Size = new Size(560, 44);
 
-            lblTitle.Font = new Font("微软雅黑", 11F, FontStyle.Bold);
-            lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(14, 11);
-            lblTitle.Size = new Size(300, 22);
-            lblTitle.Text = "MPQ Map Installer";
-
             btnShowLog.FlatStyle = FlatStyle.Flat;
             btnShowLog.Font = new Font("微软雅黑", 9F);
             btnShowLog.ForeColor = Color.White;
@@ -680,7 +670,6 @@ namespace MpqInstaller.Core
             cboLanguage.Location = new Point(456, 10);
             cboLanguage.Size = new Size(90, 25);
 
-            pnlTitle.Controls.Add(lblTitle);
             pnlTitle.Controls.Add(btnShowLog);
             pnlTitle.Controls.Add(cboLanguage);
 
@@ -732,27 +721,21 @@ namespace MpqInstaller.Core
             lblIconMode.Size = new Size(120, 20);
             lblIconMode.Text = "图标模式";
 
-            pnlIconGroup.Location = new Point(12, 219);
-            pnlIconGroup.Size = new Size(536, 28);
+            cbIconNone.Font = new Font("微软雅黑", 9F);
+            cbIconNone.Location = new Point(28, 219);
+            cbIconNone.AutoSize = true;
+            cbIconNone.Checked = true;
+            cbIconNone.Text = "不安装";
 
-            rbIconNone.Font = new Font("微软雅黑", 9F);
-            rbIconNone.Location = new Point(16, 2);
-            rbIconNone.AutoSize = true;
-            rbIconNone.Checked = true;
-            rbIconNone.Text = "不安装";
-            pnlIconGroup.Controls.Add(rbIconNone);
+            cbIconItem.Font = new Font("微软雅黑", 9F);
+            cbIconItem.Location = new Point(140, 219);
+            cbIconItem.AutoSize = true;
+            cbIconItem.Text = "物品图标";
 
-            rbIconItem.Font = new Font("微软雅黑", 9F);
-            rbIconItem.Location = new Point(120, 2);
-            rbIconItem.AutoSize = true;
-            rbIconItem.Text = "物品图标";
-            pnlIconGroup.Controls.Add(rbIconItem);
-
-            rbIconMinimap.Font = new Font("微软雅黑", 9F);
-            rbIconMinimap.Location = new Point(260, 2);
-            rbIconMinimap.AutoSize = true;
-            rbIconMinimap.Text = "小地图图标";
-            pnlIconGroup.Controls.Add(rbIconMinimap);
+            cbIconMinimap.Font = new Font("微软雅黑", 9F);
+            cbIconMinimap.Location = new Point(280, 219);
+            cbIconMinimap.AutoSize = true;
+            cbIconMinimap.Text = "小地图图标";
 
             lblHeroMode.Font = new Font("微软雅黑", 10F, FontStyle.Bold);
             lblHeroMode.ForeColor = Color.FromArgb(50, 50, 50);
@@ -823,7 +806,9 @@ namespace MpqInstaller.Core
             Controls.Add(rbProfileB);
             Controls.Add(pnlSep2);
             Controls.Add(lblIconMode);
-            Controls.Add(pnlIconGroup);
+            Controls.Add(cbIconNone);
+            Controls.Add(cbIconItem);
+            Controls.Add(cbIconMinimap);
             Controls.Add(lblHeroMode);
             Controls.Add(pnlHeroGroup);
             Controls.Add(pnlSep3);
@@ -897,6 +882,23 @@ namespace MpqInstaller.Core
             rbUninstall.CheckedChanged += (s, e) => { if (rbUninstall.Checked) UpdateUiEnabledState(); };
             rbProfileA.CheckedChanged += (s, e) => { if (_initializing || !rbProfileA.Checked) return; RefreshModesFromCurrentProfile(); };
             rbProfileB.CheckedChanged += (s, e) => { if (_initializing || !rbProfileB.Checked) return; RefreshModesFromCurrentProfile(); };
+            cbIconNone.CheckedChanged += (s, e) =>
+            {
+                if (_initializing) return;
+                if (cbIconNone.Checked) { cbIconItem.Checked = false; cbIconMinimap.Checked = false; }
+            };
+            cbIconItem.CheckedChanged += (s, e) =>
+            {
+                if (_initializing) return;
+                if (cbIconItem.Checked) cbIconNone.Checked = false;
+                else if (!cbIconMinimap.Checked) cbIconNone.Checked = true;
+            };
+            cbIconMinimap.CheckedChanged += (s, e) =>
+            {
+                if (_initializing) return;
+                if (cbIconMinimap.Checked) cbIconNone.Checked = false;
+                else if (!cbIconItem.Checked) cbIconNone.Checked = true;
+            };
             btnSingleMap.Click += (s, e) => RunInstall(false);
             btnFolder.Click += (s, e) => RunInstall(true);
             btnCancel.Click += (s, e) => CancelRun();
@@ -909,7 +911,9 @@ namespace MpqInstaller.Core
             bool configOk = _config != null && _profileItems.Count >= 2;
             rbProfileA.Enabled = installMode && configOk;
             rbProfileB.Enabled = installMode && configOk;
-            pnlIconGroup.Enabled = installMode && configOk;
+            cbIconNone.Enabled = installMode && configOk;
+            cbIconItem.Enabled = installMode && configOk;
+            cbIconMinimap.Enabled = installMode && configOk;
             pnlHeroGroup.Enabled = installMode && configOk;
             btnSingleMap.Enabled = !_running && configOk;
             btnFolder.Enabled = !_running && configOk;
@@ -966,8 +970,8 @@ namespace MpqInstaller.Core
                 string grp = kv.Value.Group;
                 if (grp == "Icon")
                 {
-                    if (iconIdx == 0) { rbIconItem.Text = display; _iconModeKey = kv.Key; }
-                    else if (iconIdx == 1) { rbIconMinimap.Text = display; }
+                    if (iconIdx == 0) { cbIconItem.Text = display; _iconModeKey = kv.Key; }
+                    else if (iconIdx == 1) { cbIconMinimap.Text = display; }
                     iconIdx++;
                 }
                 else if (grp == "Hero")
@@ -977,7 +981,9 @@ namespace MpqInstaller.Core
                     heroIdx++;
                 }
             }
-            rbIconNone.Checked = true;
+            cbIconNone.Checked = true;
+            cbIconItem.Checked = false;
+            cbIconMinimap.Checked = false;
             rbHeroNone.Checked = true;
         }
 
@@ -985,7 +991,9 @@ namespace MpqInstaller.Core
         {
             _iconModeKey = string.Empty;
             _heroModeKey = string.Empty;
-            rbIconNone.Checked = true;
+            cbIconNone.Checked = true;
+            cbIconItem.Checked = false;
+            cbIconMinimap.Checked = false;
             rbHeroNone.Checked = true;
         }
 
@@ -997,8 +1005,8 @@ namespace MpqInstaller.Core
             if (!_config.Profiles.TryGetValue(profileKey, out profile)) return new ModeConfig[0];
 
             List<ModeConfig> list = new List<ModeConfig>();
-            string iconKey = GetSelectedIconModeKey(profile);
-            if (!string.IsNullOrEmpty(iconKey))
+            string[] iconKeys = GetSelectedIconModeKeys(profile);
+            foreach (string iconKey in iconKeys)
             {
                 ModeConfig m;
                 if (profile.Modes.TryGetValue(iconKey, out m)) list.Add(m);
@@ -1012,27 +1020,18 @@ namespace MpqInstaller.Core
             return list.ToArray();
         }
 
-        private string GetSelectedIconModeKey(ProfileConfig profile)
+        private string[] GetSelectedIconModeKeys(ProfileConfig profile)
         {
-            if (rbIconItem.Checked)
-            {
-                foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
-                    if (kv.Value.Group == "Icon")
-                        return kv.Key;
-            }
-            else if (rbIconMinimap.Checked)
-            {
-                bool first = true;
-                foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
-                {
-                    if (kv.Value.Group == "Icon")
-                    {
-                        if (first) first = false;
-                        else return kv.Key;
-                    }
-                }
-            }
-            return string.Empty;
+            List<string> keys = new List<string>();
+            List<string> allIconKeys = new List<string>();
+            foreach (KeyValuePair<string, ModeConfig> kv in profile.Modes)
+                if (kv.Value.Group == "Icon")
+                    allIconKeys.Add(kv.Key);
+            if (cbIconItem.Checked && allIconKeys.Count > 0)
+                keys.Add(allIconKeys[0]);
+            if (cbIconMinimap.Checked && allIconKeys.Count > 1)
+                keys.Add(allIconKeys[1]);
+            return keys.ToArray();
         }
 
         private string GetSelectedHeroModeKey(ProfileConfig profile)
