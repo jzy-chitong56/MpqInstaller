@@ -93,6 +93,8 @@ public static class ConfigLoader
 //  MPQ 调用 + 安装计划 + 批量执行
 // ============================================================================
 
+public enum MpqExitCode { Success = 0, PermissionOrUac = 5, OtherError = -1 }
+
 public readonly record struct MpqCommandResult(int ExitCode, string Output)
 {
     public MpqExitCode Kind => ExitCode switch { 0 => MpqExitCode.Success, 5 => MpqExitCode.PermissionOrUac, _ => MpqExitCode.OtherError };
